@@ -1,4 +1,4 @@
-
+# Application version
 VERSION ?= 0.0.1
 
 # Image URL to use all building/pushing image targets
@@ -18,6 +18,9 @@ run: ## Execute application locally.
 .PHONY: test
 test: ## Run tests on project.
 	go test -race -count=1 ./...
+
+tag: ## Create git tag based on application version.
+	git tag -a -m "v$(VERSION)" v$(VERSION)
 
 ##@ Golang tools
 STATICCHECK = $(shell pwd)/bin/staticcheck
