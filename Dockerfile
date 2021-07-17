@@ -1,18 +1,17 @@
-FROM golang:1.16.5-alpine AS build-env
+FROM golang:1.16.5 AS build-env
 
 WORKDIR /opt
 
-RUN apk update && apk add make
-
 COPY . /opt
-RUN make
+RUN make build
 
-FROM alpine:3.14.0
+# ------------------------------- #
+FROM gcr.io/distroless/static:nonroot
 
 ARG binary_name
 
 WORKDIR /opt
-COPY --from=build-env /opt/${binary_name} ./app
-RUN chmod +x ./app
+COPY --from=build-env /opt/$binary_name ./app
+USER 65532:65532
 
 ENTRYPOINT ["/opt/app"]
