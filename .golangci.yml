@@ -1,0 +1,93 @@
+run:
+  deadline: 5m
+  go: "1.18"
+
+linters-settings:
+  wsl:
+    allow-cuddle-declarations: true
+    allow-assign-and-anything: true
+  nestif:
+    # minimal complexity of if statements to report, 5 by default
+    min-complexity: 6
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - dupImport
+      - ifElseChain
+      - octalLiteral
+      - whyNoLint
+      - wrapperFunc
+     # The following checks were disabled because they don't work well with generics yet.
+      - hugeParam
+      - rangeValCopy
+      - typeDefFirst
+      - paramTypeCombine
+  gosimple:
+    go: '1.16'
+  staticcheck:
+    go: '1.16'
+  misspell:
+    locale: US
+  unused:
+    go: 1.16
+
+linters:
+  disable-all: true
+  enable:
+    - asciicheck
+    - bodyclose
+    - cyclop
+    - deadcode
+    - dogsled
+    - dupl
+    - errcheck
+    - errorlint
+    - exhaustive
+    - exportloopref
+    - forbidigo
+    - gci
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - goconst
+    - gocritic
+    - gomnd
+    - gosimple
+    - govet
+    - ineffassign
+    - makezero
+    - misspell
+    - nestif
+    - nilerr
+    - noctx
+    - revive
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+    - wastedassign
+    - wsl
+  fast: false
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+  exclude-rules:
+    - linters:
+        - gocritic
+      text: "hugeParam: .*"
+
+# golangci.com configuration
+# https://github.com/golangci/golangci/wiki/Configuration
+service:
+  # use the fixed version to not introduce new linters unexpectedly
+  golangci-lint-version: 1.46.2

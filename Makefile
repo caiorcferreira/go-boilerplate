@@ -13,39 +13,53 @@ help: ## Display this help.
 
 ##@ Development
 run: ## Execute application locally.
-	go run main.go
+	go run cmd/app/main.go
 
 .PHONY: test
 test: ## Run tests on project.
-	go test -race -count=1 ./...
+	go test --tags=e2e -race -count=1 ./...
+
+.PHONY: test/unit
+test/unit: ## Run unit tests on project.
+	@echo "Running unit tests"
+	@if [ ! -z "$(CI_JOB_ID)" ]; then go test -run . ./... -race -count=1 -coverprofile coverage.out -json > go-test-report.json; else go test -race -count=1 -cover ./...; fi;
+
+.PHONY: test/e2e
+test/e2e: ## Run e2e tests on project.
+	go test --tags=e2e -count=1 ./e2e/...
 
 tag: ## Create git tag based on application version.
 	git tag -a -m "v$(VERSION)" v$(VERSION)
 
+gen: ## Run code generation.
+	go generate ./...
+
 ##@ Golang tools
-STATICCHECK = $(shell pwd)/bin/staticcheck
-staticcheck: ## Download staticcheck locally if necessary.
-	$(call go-install,$(STATICCHECK),honnef.co/go/tools/cmd/staticcheck@v0.1.3)
 
-fmt: ## Run go fmt against code.
-	go fmt ./...
+.PHONY: lint
+lint: ## Generate sonar report if running on ci
+	@echo "Linting with golangci-lint"	
+	@if [ ! -z "$(CI_JOB_ID)" ]; then \
+		golangci-lint run -c .golangci.yml --out-format code-climate:gl-code-quality-report.json,colored-line-number,checkstyle:golangci-report.xml --sort-results; \
+	else \
+		$(MAKE) golangcilint; \
+		$(GOLANGLINT) run -c .golangci.yml; \
+	fi;
 
-vet: ## Run go vet against code.
-	go vet ./...
-
-check: fmt vet staticcheck ## Execute formating, basic and advanced static analisys.
-	$(STATICCHECK) ./...
+GOLANGLINT = $(shell pwd)/bin/golangci-lint
+golangcilint: ## Download golangci-lint locally if necessary.
+	$(call go-install,$(GOLANGLINT),github.com/golangci/golangci-lint/cmd/golangci-lint@v1.46.2)
 
 ##@ Build
 binary := app
 
 .PHONY: build
-build: check test ## Build application binary.
-	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o $(binary) -ldflags="-s -w -extldflags -static" main.go
+build: ## Build application binary.
+	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o $(binary) -ldflags="-s -w -extldflags -static" cmd/app/main.go
 
 img := ${IMG_NAME}:${VERSION}
 docker-build: ## Build docker image.
-	docker build --build-arg binary_name=$(binary) -t ${img} .
+	docker build -t ${img} .
 
 docker-push: ## Push docker image.
 	docker push ${img}
