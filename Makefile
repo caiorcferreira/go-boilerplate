@@ -1,3 +1,8 @@
+ifneq (,$(wildcard ./.env))
+    include .env
+    export $(shell sed 's/=.*//' .env)
+endif
+
 # Application version
 VERSION ?= 0.0.1
 

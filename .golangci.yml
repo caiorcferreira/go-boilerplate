@@ -1,6 +1,6 @@
 run:
   deadline: 5m
-  go: "1.18"
+  go: "1.20"
 
 linters-settings:
   wsl:
@@ -42,7 +42,6 @@ linters:
     - asciicheck
     - bodyclose
     - cyclop
-    - deadcode
     - dogsled
     - dupl
     - errcheck
@@ -71,8 +70,6 @@ linters:
     - typecheck
     - unconvert
     - unparam
-    - unused
-    - varcheck
     - wastedassign
     - wsl
   fast: false
